@@ -291,18 +291,20 @@ removeTabsRelative = (direction, {tab: activeTab}) ->
 # - direction: "next", "previous", "first" or "last".
 selectTab = (direction, {count, tab}) ->
   chrome.tabs.query { currentWindow: true }, (tabs) ->
-    if 1 < tabs.length
+    visibleTabs = tabs.filter (t) -> !t.hidden
+    index = visibleTabs.findIndex (t) -> t.id == tab.id
+    if 1 < visibleTabs.length and index != -1
       toSelect =
         switch direction
           when "next"
-            (tab.index + count) % tabs.length
+            (index + count) % visibleTabs.length
           when "previous"
-            (tab.index - count + count * tabs.length) % tabs.length
+            (index - count + count * visibleTabs.length) % visibleTabs.length
           when "first"
-            Math.min tabs.length - 1, count - 1
+            Math.min visibleTabs.length - 1, count - 1
           when "last"
-            Math.max 0, tabs.length - count
-      chrome.tabs.update tabs[toSelect].id, active: true
+            Math.max 0, visibleTabs.length - count
+      chrome.tabs.update visibleTabs[toSelect].id, active: true
 
 chrome.webNavigation.onCommitted.addListener ({tabId, frameId}) ->
   cssConf =
