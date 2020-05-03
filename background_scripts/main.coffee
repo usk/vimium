@@ -180,11 +180,12 @@ selectSpecificTab = (request) ->
 moveTab = ({count, tab, registryEntry}) ->
   count = -count if registryEntry.command == "moveTabLeft"
   chrome.tabs.query { currentWindow: true }, (tabs) ->
-    pinnedCount = (tabs.filter (tab) -> tab.pinned).length
+    visibleTabs = tabs.filter (t) -> !t.hidden
+    pinnedCount = (visibleTabs.filter (tab) -> tab.pinned).length
     minIndex = if tab.pinned then 0 else pinnedCount
-    maxIndex = (if tab.pinned then pinnedCount else tabs.length) - 1
+    maxIndex = (if tab.pinned then pinnedCount else visibleTabs.length) - 1
     chrome.tabs.move tab.id,
-      index: Math.max minIndex, Math.min maxIndex, tab.index + count
+      index: visibleTabs[Math.max minIndex, Math.min maxIndex, (visibleTabs.findIndex (t) -> t.id == tab.id) + count].index
 
 mkRepeatCommand = (command) -> (request) ->
   if 0 < request.count--
