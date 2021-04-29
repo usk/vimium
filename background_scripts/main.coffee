@@ -285,7 +285,7 @@ removeTabsRelative = (direction, {tab: activeTab}) ->
         when "both"
           (index) -> index != activeTab.index
 
-    chrome.tabs.remove (tab.id for tab in tabs when not tab.pinned and shouldDelete tab.index)
+    chrome.tabs.remove (tab.id for tab in tabs when not tab.pinned and not tab.hidden and shouldDelete tab.index)
 
 # Selects a tab before or after the currently selected tab.
 # - direction: "next", "previous", "first" or "last".
