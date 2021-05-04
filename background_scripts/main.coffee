@@ -240,6 +240,7 @@ BackgroundCommands =
   nextTab: (request) -> selectTab "next", request
   previousTab: (request) -> selectTab "previous", request
   firstTab: (request) -> selectTab "first", request
+  unpinnedFirstTab: (request) -> selectTab "unpinnedFirst", request
   lastTab: (request) -> selectTab "last", request
   removeTab: ({count, tab}) -> forCountTabs count, tab, (tab) -> chrome.tabs.remove tab.id
   restoreTab: mkRepeatCommand (request, callback) -> chrome.sessions.restore null, callback request
@@ -302,6 +303,11 @@ selectTab = (direction, {count, tab}) ->
             (index - count + count * visibleTabs.length) % visibleTabs.length
           when "first"
             Math.min visibleTabs.length - 1, count - 1
+          when "unpinnedFirst"
+            if 0 < (visibleTabs.filter (t) -> !t.pinned).length
+              visibleTabs.findIndex (t) -> !t.pinned
+            else
+              index
           when "last"
             Math.max 0, visibleTabs.length - count
       chrome.tabs.update visibleTabs[toSelect].id, active: true
