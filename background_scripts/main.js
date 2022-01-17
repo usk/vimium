@@ -229,11 +229,12 @@ const moveTab = function({count, tab, registryEntry}) {
   if (registryEntry.command === "moveTabLeft")
     count = -count;
   return chrome.tabs.query({ currentWindow: true }, function(tabs) {
-    const pinnedCount = (tabs.filter(tab => tab.pinned)).length;
+    const visibleTabs = tabs.filter(tab => !tab.hidden);
+    const pinnedCount = (visibleTabs.filter(tab => tab.pinned)).length;
     const minIndex = tab.pinned ? 0 : pinnedCount;
-    const maxIndex = (tab.pinned ? pinnedCount : tabs.length) - 1;
+    const maxIndex = (tab.pinned ? pinnedCount : visibleTabs.length) - 1;
     return chrome.tabs.move(tab.id,
-      {index: Math.max(minIndex, Math.min(maxIndex, tab.index + count))});
+      {index: visibleTabs[Math.max(minIndex, Math.min(maxIndex, visibleTabs.findIndex(t => t.id == tab.id) + count))].index});
   });
 };
 
