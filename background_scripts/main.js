@@ -379,19 +379,21 @@ var removeTabsRelative = (direction, {tab: activeTab}) => chrome.tabs.query({cur
 // Selects a tab before or after the currently selected tab.
 // - direction: "next", "previous", "first" or "last".
 var selectTab = (direction, {count, tab}) => chrome.tabs.query({ currentWindow: true }, function(tabs) {
-  if (tabs.length > 1) {
+  const visibleTabs = tabs.filter(t => !t.hidden);
+  const index = visibleTabs.findIndex(t => t.id == tab.id);
+  if (visibleTabs.length > 1 && index != -1) {
     const toSelect =
       (() => { switch (direction) {
         case "next":
-          return (tab.index + count) % tabs.length;
+          return (index + count) % visibleTabs.length;
         case "previous":
-          return ((tab.index - count) + (count * tabs.length)) % tabs.length;
+          return ((index - count) + (count * visibleTabs.length)) % visibleTabs.length;
         case "first":
-          return Math.min(tabs.length - 1, count - 1);
+          return Math.min(visibleTabs.length - 1, count - 1);
         case "last":
-          return Math.max(0, tabs.length - count);
+          return Math.max(0, visibleTabs.length - count);
       } })();
-    chrome.tabs.update(tabs[toSelect].id, {active: true});
+    chrome.tabs.update(visibleTabs[toSelect].id, {active: true});
   }
 });
 
