@@ -236,6 +236,7 @@ const Commands = {
       "nextTab",
       "visitPreviousTab",
       "firstTab",
+      "unpinnedFirstTab",
       "lastTab",
       "duplicateTab",
       "togglePinTab",
@@ -424,6 +425,7 @@ const commandDescriptions = {
   previousTab: ["Go one tab left", { background: true }],
   visitPreviousTab: ["Go to previously-visited tab", { background: true }],
   firstTab: ["Go to the first tab", { background: true }],
+  unpinnedFirstTab: ["Go to the unpinned first tab", { background: true }],
   lastTab: ["Go to the last tab", { background: true }],
 
   createTab: ["Create new tab", { background: true, repeatLimit: 20 }],

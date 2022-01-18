@@ -312,6 +312,7 @@ const BackgroundCommands = {
   nextTab(request) { return selectTab("next", request); },
   previousTab(request) { return selectTab("previous", request); },
   firstTab(request) { return selectTab("first", request); },
+  unpinnedFirstTab(request) { return selectTab("unpinnedFirst", request); },
   lastTab(request) { return selectTab("last", request); },
   removeTab({count, tab}) { return forCountTabs(count, tab, tab => chrome.tabs.remove(tab.id)); },
   restoreTab: mkRepeatCommand((request, callback) => chrome.sessions.restore(null, callback(request))),
@@ -390,6 +391,10 @@ var selectTab = (direction, {count, tab}) => chrome.tabs.query({ currentWindow: 
           return ((index - count) + (count * visibleTabs.length)) % visibleTabs.length;
         case "first":
           return Math.min(visibleTabs.length - 1, count - 1);
+        case "unpinnedFirst":
+          if (visibleTabs.filter(t => !t.pinned).length > 0)
+            return visibleTabs.findIndex(t => !t.pinned);
+          return index;
         case "last":
           return Math.max(0, visibleTabs.length - count);
       } })();
