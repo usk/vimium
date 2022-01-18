@@ -1,4 +1,9 @@
 {
+  "applications": {
+    "gecko": {
+      "id": "vimium@example.net"
+    }
+  },
   "manifest_version": 2,
   "name": "Vimium",
   "version": "1.67",
