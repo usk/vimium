@@ -42,7 +42,6 @@ function buildStorePackage() {
     "test_harnesses",
     "tests",
   ];
-  const manifestContents = require("./dist/vimium/manifest.json");
   const rsyncOptions = ["-r", ".", "dist/vimium"].concat(
     ...excludeList.map((item) => ["--exclude", item])
   );
@@ -59,6 +58,7 @@ function buildStorePackage() {
   spawn("rm", ["-rf", "dist/vimium"]);
   spawn("mkdir", ["--parents", "dist/vimium", "dist/chrome-canary", "dist/chrome-store", "dist/firefox"]);
   spawn("rsync", rsyncOptions);
+  const manifestContents = require("./dist/vimium/manifest.json");
 
   writeDistManifest(Object.assign({}, manifestContents, {
     // Chrome considers this key invalid in manifest.json, so we add it during the build phase.
