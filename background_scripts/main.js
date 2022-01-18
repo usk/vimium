@@ -372,7 +372,7 @@ var removeTabsRelative = (direction, {tab: activeTab}) => chrome.tabs.query({cur
         return index => index !== activeTab.index;
     } })();
 
-  chrome.tabs.remove(tabs.filter(t => !t.pinned && shouldDelete(t.index))
+  chrome.tabs.remove(tabs.filter(t => !t.pinned && !t.hiidden && shouldDelete(t.index))
                      .map((t) => t.id));
 });
 
