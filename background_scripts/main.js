@@ -229,11 +229,12 @@ const moveTab = function({count, tab, registryEntry}) {
   if (registryEntry.command === "moveTabLeft")
     count = -count;
   return chrome.tabs.query({ currentWindow: true }, function(tabs) {
-    const pinnedCount = (tabs.filter(tab => tab.pinned)).length;
+    const visibleTabs = tabs.filter(tab => !tab.hidden);
+    const pinnedCount = (visibleTabs.filter(tab => tab.pinned)).length;
     const minIndex = tab.pinned ? 0 : pinnedCount;
-    const maxIndex = (tab.pinned ? pinnedCount : tabs.length) - 1;
+    const maxIndex = (tab.pinned ? pinnedCount : visibleTabs.length) - 1;
     return chrome.tabs.move(tab.id,
-      {index: Math.max(minIndex, Math.min(maxIndex, tab.index + count))});
+      {index: visibleTabs[Math.max(minIndex, Math.min(maxIndex, visibleTabs.findIndex(t => t.id == tab.id) + count))].index});
   });
 };
 
@@ -311,6 +312,7 @@ const BackgroundCommands = {
   nextTab(request) { return selectTab("next", request); },
   previousTab(request) { return selectTab("previous", request); },
   firstTab(request) { return selectTab("first", request); },
+  unpinnedFirstTab(request) { return selectTab("unpinnedFirst", request); },
   lastTab(request) { return selectTab("last", request); },
   removeTab({count, tab}) { return forCountTabs(count, tab, tab => chrome.tabs.remove(tab.id)); },
   restoreTab: mkRepeatCommand((request, callback) => chrome.sessions.restore(null, callback(request))),
@@ -371,26 +373,32 @@ var removeTabsRelative = (direction, {tab: activeTab}) => chrome.tabs.query({cur
         return index => index !== activeTab.index;
     } })();
 
-  chrome.tabs.remove(tabs.filter(t => !t.pinned && shouldDelete(t.index))
+  chrome.tabs.remove(tabs.filter(t => !t.pinned && !t.hiidden && shouldDelete(t.index))
                      .map((t) => t.id));
 });
 
 // Selects a tab before or after the currently selected tab.
 // - direction: "next", "previous", "first" or "last".
 var selectTab = (direction, {count, tab}) => chrome.tabs.query({ currentWindow: true }, function(tabs) {
-  if (tabs.length > 1) {
+  const visibleTabs = tabs.filter(t => !t.hidden);
+  const index = visibleTabs.findIndex(t => t.id == tab.id);
+  if (visibleTabs.length > 1 && index != -1) {
     const toSelect =
       (() => { switch (direction) {
         case "next":
-          return (tab.index + count) % tabs.length;
+          return (index + count) % visibleTabs.length;
         case "previous":
-          return ((tab.index - count) + (count * tabs.length)) % tabs.length;
+          return ((index - count) + (count * visibleTabs.length)) % visibleTabs.length;
         case "first":
-          return Math.min(tabs.length - 1, count - 1);
+          return Math.min(visibleTabs.length - 1, count - 1);
+        case "unpinnedFirst":
+          if (visibleTabs.filter(t => !t.pinned).length > 0)
+            return visibleTabs.findIndex(t => !t.pinned);
+          return index;
         case "last":
-          return Math.max(0, tabs.length - count);
+          return Math.max(0, visibleTabs.length - count);
       } })();
-    chrome.tabs.update(tabs[toSelect].id, {active: true});
+    chrome.tabs.update(visibleTabs[toSelect].id, {active: true});
   }
 });
 
