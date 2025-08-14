@@ -460,6 +460,13 @@ const allCommands = [
   },
 
   {
+    name: "unpinnedFirstTab",
+    desc: "Go to the unpinned first tab",
+    group: "tabs",
+    background: true,
+  },
+
+  {
     name: "lastTab",
     desc: "Go to the last tab",
     group: "tabs",
