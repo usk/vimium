@@ -318,6 +318,9 @@ const BackgroundCommands = {
   firstTab(request) {
     return selectTab("first", request);
   },
+  unpinnedFirstTab(request) {
+    return selectTab("unpinnedFirst", request);
+  },
   lastTab(request) {
     return selectTab("last", request);
   },
@@ -475,6 +478,12 @@ function selectTab(direction, { count, tab }) {
             return ((getTabIndex(tab, tabs) - count) + (count * tabs.length)) % tabs.length;
           case "first":
             return Math.min(tabs.length - 1, count - 1);
+          case "unpinnedFirst":
+            const unpinnedFirstTabIndex = tabs.findIndex(t => !t.pinned)
+            if (unpinnedFirstTabIndex == -1) {
+              return getTabIndex(tab, tabs);
+            }
+            return unpinnedFirstTabIndex;
           case "last":
             return Math.max(0, tabs.length - count);
         }

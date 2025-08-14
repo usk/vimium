@@ -467,6 +467,7 @@ const defaultKeyMappings = {
   "<<": "moveTabLeft",
   ">>": "moveTabRight",
   "g0": "firstTab",
+  "g1": "unpinnedFirstTab",
   "g$": "lastTab",
   "W": "moveTabToNewWindow",
   "t": "createTab",
